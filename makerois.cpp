@@ -53,19 +53,17 @@ int main(int argc, char *argv[])
 {
   srand(time(NULL));
 
-  char imagename[512];
-
   if (argc != 3) {
     fprintf(stderr, "Usage: %s file dir\n", argv[0]);
     return -1;
   }
 
+  string imagename = argv[1];
   string dirname = argv[2];
 
-  strncpy(imagename, argv[1], 512);
   Mat img = imread(imagename, 1);
   if(img.empty()) {
-    fprintf(stderr, "%s is empty\n", imagename);
+    cerr << imagename << " is empty" << endl;
     return -1;
   }
 
@@ -86,20 +84,20 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  vector<Rect> faces;
+  vector<Rect> faceRects;
   /// マルチスケール（顔）探索xo
   // 画像，出力矩形，縮小スケール，最低矩形数，（フラグ），最小矩形
-  cascade.detectMultiScale(smallImg, faces,
+  cascade.detectMultiScale(smallImg, faceRects,
       1.1, 2,
       CV_HAAR_SCALE_IMAGE,
       Size(30, 30));
 
-  if (faces.size() != 1) {
-    cerr << "faces are too many or too few faces: " << faces.size() << endl;
+  if (faceRects.size() != 1) {
+    cerr << "faces are too many or too few faces: " << faceRects.size() << endl;
     return -1;
   }
 
-  Rect faceRect = faces.at(0);
+  Rect faceRect = faceRects.at(0);
 
   // 眼の検出
   string nested_cascadeName = "./haarcascade_eye.xml";
@@ -110,13 +108,13 @@ int main(int argc, char *argv[])
   }
 
   int nr_count = 0;
-  Mat smallImgROI;
+  Mat faceMat;
   vector<Rect> nestedObjects;
 
-  smallImgROI = smallImg(faceRect);
+  faceMat = smallImg(faceRect);
   /// マルチスケール（目）探索
   // 画像，出力矩形，縮小スケール，最低矩形数，（フラグ），最小矩形
-  nested_cascade.detectMultiScale(smallImgROI, nestedObjects,
+  nested_cascade.detectMultiScale(faceMat, nestedObjects,
       1.1, 3,
       CV_HAAR_SCALE_IMAGE, 
       Size(10,10));
@@ -128,25 +126,23 @@ int main(int argc, char *argv[])
 
   // 画像を保存する
   // 顔領域のみを保存 ROIで
-  imwrite(dirname + "/face.jpg", smallImgROI);
+  imwrite(dirname + "/face.jpg", faceMat);
 
   Rect eyeRect1 = nestedObjects.at(0);
   Rect eyeRect2 = nestedObjects.at(1);
-  Rect eyeAbsRect1(faceRect.x + eyeRect1.x, faceRect.y + eyeRect1.y, eyeRect1.width, eyeRect1.height);
-  Rect eyeAbsRect2(faceRect.x + eyeRect2.x, faceRect.y + eyeRect2.y, eyeRect2.width, eyeRect2.height);
   Mat left_eye, right_eye;
 
   if (eyeRect1.x < eyeRect2.x) {
-    left_eye = smallImg(eyeAbsRect2);
-    right_eye = smallImg(eyeAbsRect1);
+    left_eye = faceMat(eyeRect2);
+    right_eye = faceMat(eyeRect1);
   }
   else {
-    left_eye = smallImg(eyeAbsRect1);
-    right_eye = smallImg(eyeAbsRect2);
+    left_eye = faceMat(eyeRect1);
+    right_eye = faceMat(eyeRect2);
   }
   imwrite(dirname + "/left_eye.jpg",left_eye);
   imwrite(dirname + "/right_eye.jpg", right_eye);
 
-  saveRoi(smallImgROI, "./haarcascade_mcs_nose.xml", dirname + "/nose.jpg");
-  saveRoi(smallImgROI, "./haarcascade_mcs_mouth.xml", dirname + "/mouth.jpg");
+  saveRoi(faceMat, "./haarcascade_mcs_nose.xml", dirname + "/nose.jpg");
+  saveRoi(faceMat, "./haarcascade_mcs_mouth.xml", dirname + "/mouth.jpg");
 }
