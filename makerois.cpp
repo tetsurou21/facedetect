@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
   equalizeHist( smallImg, smallImg);
 
   // 分類器の読み込み
-  string cascadeName = "./haarcascade_frontalface_alt.xml"; // Haar-like
+  string cascadeName = "./classifier/haarcascade_frontalface_alt.xml"; // Haar-like
   CascadeClassifier cascade;
   if(!cascade.load(cascadeName)) {
     cerr << "failed to load " << cascadeName << endl;
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
   Rect faceRect = faceRects.at(0);
 
   // 眼の検出
-  string nested_cascadeName = "./haarcascade_eye.xml";
+  string nested_cascadeName = "./classifier/haarcascade_eye.xml";
   CascadeClassifier nested_cascade;
   if(!nested_cascade.load(nested_cascadeName)) {
     cerr << "failed to load " << nested_cascadeName << endl;
@@ -151,6 +151,6 @@ int main(int argc, char *argv[])
   imwrite(dirname + "/right_eye.jpg", right_eye);
 
   Point nosePoint(0,0), mouthPoint(0,0);
-  saveRoi(faceMat, "./haarcascade_mcs_nose.xml", dirname + "/nose.jpg", nosePoint);
-  saveRoi(faceMat, "./haarcascade_mcs_mouth.xml", dirname + "/mouth.jpg", mouthPoint);
+  saveRoi(faceMat, "./classifier/haarcascade_mcs_nose.xml", dirname + "/nose.jpg", nosePoint);
+  saveRoi(faceMat, "./classifier/haarcascade_mcs_mouth.xml", dirname + "/mouth.jpg", mouthPoint);
 }

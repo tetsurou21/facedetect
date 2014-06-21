@@ -68,10 +68,10 @@ int main(int argc, char *argv[])
     return -1;
   }
 
-  vector<Rect> srcRects = findFaces(srcImage, "./haarcascade_frontalface_alt.xml");
+  vector<Rect> srcRects = findFaces(srcImage, "./classifier/haarcascade_frontalface_alt.xml");
   Rect srcRect = srcRects.at(0);
   Mat srcFaceImage = srcImage(srcRect);
-  vector<Rect> targetRects = findFaces(targetImage, "./lbpcascade_animeface.xml");
+  vector<Rect> targetRects = findFaces(targetImage, "./classifier/lbpcascade_animeface.xml");
 
   vector<Rect>::const_iterator r = targetRects.begin();
   for(; r != targetRects.end(); ++r) {

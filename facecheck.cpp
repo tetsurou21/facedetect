@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
   cv::equalizeHist( smallImg, smallImg);
 
   // 分類器の読み込み
-  std::string cascadeName = "./haarcascade_frontalface_alt.xml"; // Haar-like
+  std::string cascadeName = "./classifier/haarcascade_frontalface_alt.xml"; // Haar-like
   cv::CascadeClassifier cascade;
   if(!cascade.load(cascadeName)) {
     std::cerr << "failed to load " << cascadeName << endl;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
       CV_HAAR_SCALE_IMAGE,
       cv::Size(30, 30));
 
-  std::string nested_cascadeName = "./haarcascade_eye.xml";
+  std::string nested_cascadeName = "./classifier/haarcascade_eye.xml";
   cv::CascadeClassifier nested_cascade;
   if(!nested_cascade.load(nested_cascadeName)) {
     std::cerr << "failed to load " << nested_cascadeName << std::endl;
