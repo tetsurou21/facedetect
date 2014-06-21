@@ -26,7 +26,7 @@
 using namespace std;
 using namespace cv;
 
-int saveRoi(Mat faceMat, string cascadeFile, string outputFile) {
+int saveRoi(Mat faceMat, string cascadeFile, string outputFile, Point& p) {
   CascadeClassifier classifiler;
   if(!classifiler.load(cascadeFile)) {
     cerr << "failed to load " << cascadeFile << endl;
@@ -46,6 +46,8 @@ int saveRoi(Mat faceMat, string cascadeFile, string outputFile) {
   Rect roiRect = roiRects.at(0);
   Mat roi = faceMat(roiRect);
   imwrite(outputFile, roi);
+  p.x = roiRect.x;
+  p.y = roiRect.y;
   return 0;
 }
 
@@ -131,18 +133,24 @@ int main(int argc, char *argv[])
   Rect eyeRect1 = nestedObjects.at(0);
   Rect eyeRect2 = nestedObjects.at(1);
   Mat left_eye, right_eye;
+  Point leftEyePoint, rightEyePoint;
 
   if (eyeRect1.x < eyeRect2.x) {
     left_eye = faceMat(eyeRect2);
     right_eye = faceMat(eyeRect1);
+    leftEyePoint = eyeRect2.tl();
+    rightEyePoint = eyeRect1.tl();
   }
   else {
     left_eye = faceMat(eyeRect1);
     right_eye = faceMat(eyeRect2);
+    leftEyePoint = eyeRect1.tl();
+    rightEyePoint = eyeRect2.tl();
   }
   imwrite(dirname + "/left_eye.jpg",left_eye);
   imwrite(dirname + "/right_eye.jpg", right_eye);
 
-  saveRoi(faceMat, "./haarcascade_mcs_nose.xml", dirname + "/nose.jpg");
-  saveRoi(faceMat, "./haarcascade_mcs_mouth.xml", dirname + "/mouth.jpg");
+  Point nosePoint(0,0), mouthPoint(0,0);
+  saveRoi(faceMat, "./haarcascade_mcs_nose.xml", dirname + "/nose.jpg", nosePoint);
+  saveRoi(faceMat, "./haarcascade_mcs_mouth.xml", dirname + "/mouth.jpg", mouthPoint);
 }
