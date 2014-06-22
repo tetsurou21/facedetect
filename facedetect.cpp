@@ -50,32 +50,41 @@ int main(int argc, char *argv[])
 {
   srand(time(NULL));
 
-  if (argc != 3) {
+  if (argc < 3) {
     fprintf(stderr, "Usage: %s from to\n", argv[0]);
     return -1;
   }
-  string srcFile = argv[1];
-  string targetFile = argv[2];
-
-  Mat srcImage = imread(srcFile, 1);
-  if (srcImage.empty()) {
-    cerr << "failed to load " << srcFile << endl;
-    return -1;
+  vector<Mat> srcImages = vector<Mat>();
+  for (int i = 1; i < argc-1; i++) {
+    string srcFile = argv[i];
+    Mat srcImage = imread(srcFile, 1);
+    if (srcImage.empty()) {
+      cerr << "failed to load " << srcFile << endl;
+      return -1;
+    }
+    srcImages.push_back(srcImage);
   }
+
+  string targetFile = argv[argc-1];
+
   Mat targetImage = imread(targetFile, 1);
   if (targetImage.empty()) {
     cerr << "failed to load " << targetFile << endl;
     return -1;
   }
 
-  vector<Rect> srcRects = findFaces(srcImage, "./classifier/haarcascade_frontalface_alt.xml");
-  Rect srcRect = srcRects.at(0);
-  Mat srcFaceImage = srcImage(srcRect);
   vector<Rect> targetRects = findFaces(targetImage, "./classifier/lbpcascade_animeface.xml");
-
-  vector<Rect>::const_iterator r = targetRects.begin();
-  for(; r != targetRects.end(); ++r) {
-    Rect faceRect = *r;
+  vector<Mat>::const_iterator si = srcImages.begin();
+  vector<Rect>::const_iterator ti = targetRects.begin();
+  for (; ti != targetRects.end(); ++si, ++ti) {
+    if (si == srcImages.end()) {
+      si = srcImages.begin();
+    }
+    Mat srcImage = *si;
+    vector<Rect> srcRects = findFaces(srcImage, "./classifier/haarcascade_frontalface_alt.xml");
+    Rect srcRect = srcRects.at(0);
+    Mat srcFaceImage = srcImage(srcRect);
+    Rect faceRect = *ti;
     Mat targetFaceImage = targetImage(faceRect);
     Mat resizedSrcFaceImage(faceRect.width, faceRect.height, targetFaceImage.channels());
     resize(srcFaceImage, resizedSrcFaceImage, resizedSrcFaceImage.size());
@@ -87,6 +96,7 @@ int main(int argc, char *argv[])
       }
     }    
   }
+
   imwrite("detected.jpg", targetImage);
 
   namedWindow("detect", CV_WINDOW_AUTOSIZE|CV_WINDOW_FREERATIO);
