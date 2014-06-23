@@ -1,0 +1,3 @@
+facedetect ... 画像を顔認識して顔の部分を置き換える
+facecheck  ... 顔認識できればtrueそうでなければfalseを出力する
+makerois   ... 顔、眼、鼻、口のファイルを書き出す
